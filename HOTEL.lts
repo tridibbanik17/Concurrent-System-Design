@@ -1,0 +1,6 @@
+HOTEL = (request -> REQUESTED),
+REQUESTED = (available -> confirmation_sent -> CONFIRMED | not_available -> add_to_waiting_list -> ON_WAITING_LIST),
+CONFIRMED  = (use_room -> pays_for_room -> ARCHIVED),
+ON_WAITING_LIST  = (room_available -> CONFIRMED | give_up_waiting -> CANCELLED),
+ARCHIVED = (record_transactions -> STOP),
+CANCELLED = (record_transactions -> STOP).
