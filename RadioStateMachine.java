@@ -2,16 +2,26 @@
 // Compile: javac RadioStateMachine.java
 // Run:     java RadioStateMachine
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.time.LocalTime;
+import java.util.Timer;
+import java.util.TimerTask;
+import javax.swing.*;
 
 public class RadioStateMachine extends JFrame {
     enum State { OFF, TOP, SCANNING, TUNED, BOTTOM }
 
     private State state = State.OFF;
+    private double frequency = 108.0;
+    private static final double STEP = 0.5;
+    private static final double MAX_FREQ = 108.0;
+    private static final double MIN_FREQ = 88.0;
+
+    private Timer scanTimer;
+
     private final JLabel stateLabel = new JLabel();
+    private final JLabel freqLabel = new JLabel();
     private final JTextArea log = new JTextArea(8, 40);
     private final JButton btnOn = new JButton("on");
     private final JButton btnScan = new JButton("scan");
@@ -24,7 +34,7 @@ public class RadioStateMachine extends JFrame {
         super("Radio State Machine");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout(8,8));
-        setResizable(false);
+        setResizable(true); // allow full screen
 
         // Top: current state
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -32,6 +42,13 @@ public class RadioStateMachine extends JFrame {
         stateLabel.setFont(stateLabel.getFont().deriveFont(Font.BOLD, 16f));
         topPanel.add(stateLabel);
         add(topPanel, BorderLayout.NORTH);
+
+        // Middle-top: frequency
+        JPanel freqPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        freqPanel.add(new JLabel("Current frequency: "));
+        freqLabel.setFont(freqLabel.getFont().deriveFont(Font.BOLD, 16f));
+        freqPanel.add(freqLabel);
+        add(freqPanel, BorderLayout.BEFORE_FIRST_LINE);
 
         // Center: buttons
         JPanel center = new JPanel(new GridLayout(2, 3, 8, 8));
@@ -57,13 +74,13 @@ public class RadioStateMachine extends JFrame {
         btnLock.addActionListener(e -> handleEvent("lock"));
         btnEnd.addActionListener(e -> handleEvent("end"));
 
-        // Keyboard shortcuts
         setupShortcuts();
 
-        // initialize UI
         updateUIFromState();
-        pack();
-        setLocationRelativeTo(null);
+
+        // Default size (wider) + still resizable
+        setSize(900, 600);
+        setLocationRelativeTo(null); // center on screen
         setVisible(true);
     }
 
@@ -75,7 +92,7 @@ public class RadioStateMachine extends JFrame {
         im.put(KeyStroke.getKeyStroke('o'), "on");
         im.put(KeyStroke.getKeyStroke('s'), "scan");
         im.put(KeyStroke.getKeyStroke('r'), "reset");
-        im.put(KeyStroke.getKeyStroke('f'), "off"); // 'f' for off
+        im.put(KeyStroke.getKeyStroke('f'), "off");
         im.put(KeyStroke.getKeyStroke('l'), "lock");
         im.put(KeyStroke.getKeyStroke('e'), "end");
 
@@ -91,34 +108,62 @@ public class RadioStateMachine extends JFrame {
         State old = state;
         switch (state) {
             case OFF:
-                if ("on".equals(event)) state = State.TOP;
-                // other events in OFF do nothing except off (stay) or invalid
+                if ("on".equals(event)) {
+                    state = State.TOP;
+                    frequency = MAX_FREQ;
+                }
                 break;
             case TOP:
-                if ("scan".equals(event)) state = State.SCANNING;
-                else if ("reset".equals(event)) state = State.TOP; // stays TOP
-                else if ("off".equals(event)) state = State.OFF;
+                if ("scan".equals(event)) {
+                    state = State.SCANNING;
+                    startScanning();
+                } else if ("reset".equals(event)) {
+                    frequency = MAX_FREQ;
+                    state = State.TOP;
+                } else if ("off".equals(event)) {
+                    state = State.OFF;
+                }
                 break;
             case SCANNING:
-                if ("scan".equals(event)) state = State.SCANNING; // stay scanning
-                else if ("reset".equals(event)) state = State.TOP;
-                else if ("off".equals(event)) state = State.OFF;
-                else if ("lock".equals(event)) state = State.TUNED;
-                else if ("end".equals(event)) state = State.BOTTOM;
+                if ("reset".equals(event)) {
+                    stopScanning();
+                    frequency = MAX_FREQ;
+                    state = State.TOP;
+                } else if ("off".equals(event)) {
+                    stopScanning();
+                    state = State.OFF;
+                } else if ("lock".equals(event)) {
+                    stopScanning();
+                    state = State.TUNED;
+                } else if ("end".equals(event)) {
+                    stopScanning();
+                    frequency = MIN_FREQ;
+                    state = State.BOTTOM;
+                }
                 break;
             case TUNED:
-                if ("scan".equals(event)) state = State.SCANNING;
-                else if ("reset".equals(event)) state = State.TOP;
-                else if ("off".equals(event)) state = State.OFF;
+                if ("scan".equals(event)) {
+                    state = State.SCANNING;
+                    startScanning();
+                } else if ("reset".equals(event)) {
+                    frequency = MAX_FREQ;
+                    state = State.TOP;
+                } else if ("off".equals(event)) {
+                    state = State.OFF;
+                }
                 break;
             case BOTTOM:
-                if ("scan".equals(event)) state = State.BOTTOM; // stays BOTTOM
-                else if ("reset".equals(event)) state = State.TOP;
-                else if ("off".equals(event)) state = State.OFF;
+                if ("scan".equals(event)) {
+                    // explicitly do nothing, but button stays enabled
+                } else if ("reset".equals(event)) {
+                    frequency = MAX_FREQ;
+                    state = State.TOP;
+                } else if ("off".equals(event)) {
+                    state = State.OFF;
+                }
                 break;
         }
 
-        // Log and update UI
         if (old != state) {
             log(String.format("Event '%s' : %s -> %s", event, old, state));
         } else {
@@ -127,17 +172,54 @@ public class RadioStateMachine extends JFrame {
         updateUIFromState();
     }
 
+    private void startScanning() {
+        stopScanning();
+        scanTimer = new Timer();
+
+        // Drop one step immediately
+        frequency -= STEP;
+        if (frequency <= MIN_FREQ) {
+            frequency = MIN_FREQ;
+            handleEvent("end");
+            return;
+        }
+        updateUIFromState();
+
+        scanTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                if (state != State.SCANNING) {
+                    stopScanning();
+                    return;
+                }
+                frequency -= STEP;
+                if (frequency <= MIN_FREQ) {
+                    frequency = MIN_FREQ;
+                    SwingUtilities.invokeLater(() -> handleEvent("end"));
+                }
+                SwingUtilities.invokeLater(() -> updateUIFromState());
+            }
+        }, 500, 500);
+    }
+
+    private void stopScanning() {
+        if (scanTimer != null) {
+            scanTimer.cancel();
+            scanTimer = null;
+        }
+    }
+
     private void updateUIFromState() {
         stateLabel.setText(state.toString());
-        // enable/disable buttons depending on state (optional, but helpful)
+        freqLabel.setText(String.format("%.1f MHz", frequency));
+
         btnOn.setEnabled(state == State.OFF);
-        btnScan.setEnabled(state == State.TOP || state == State.SCANNING || state == State.TUNED || state == State.BOTTOM);
+        btnScan.setEnabled(state != State.OFF); 
         btnReset.setEnabled(state != State.OFF);
-        btnOff.setEnabled(true); // off should always be usable
+        btnOff.setEnabled(true);
         btnLock.setEnabled(state == State.SCANNING);
         btnEnd.setEnabled(state == State.SCANNING);
 
-        // Visual hint (background color per state)
         Color bg;
         switch (state) {
             case OFF: bg = Color.LIGHT_GRAY; break;
@@ -158,7 +240,11 @@ public class RadioStateMachine extends JFrame {
     }
 
     public static void main(String[] args) {
-        // Schedule on EDT
-        SwingUtilities.invokeLater(RadioStateMachine::new);
+        SwingUtilities.invokeLater(() -> {
+            RadioStateMachine app = new RadioStateMachine();
+
+            // Optional: Uncomment this line to start in full screen
+            // app.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        });
     }
 }
