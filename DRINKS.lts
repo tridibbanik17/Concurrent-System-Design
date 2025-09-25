@@ -1,0 +1,22 @@
+DEPOSIT_COIN = ZERO,
+ZERO = (in.coin [5] -> FIVE | in.coin [10] -> TEN | in.coin [25] -> TWENTY_FIVE),
+FIVE = (in.coin [5] -> TEN | in.coin [10] -> FIFTEEN | in.coin [25] -> THIRTY),
+TEN = (in.coin [5] -> FIFTEEN | in.coin [10] -> TWENTY | in.coin [25] -> THIRTY_FIVE),
+FIFTEEN = (sugerola -> STOP | in.coin [5] -> TWENTY | in.coin [10] -> TWENTY_FIVE | in.coin [25] -> FORTY),
+TWENTY = (sugeroladiet -> STOP | in.coin [5] -> TWENTY_FIVE | in.coin [10] -> THIRTY| in.coin [25] -> FORTY_FIVE),
+TWENTY_FIVE = (sugerolasuperdiet -> STOP | in.coin [5] -> THIRTY | in.coin [10] -> THIRTY_FIVE | in.coin [25] -> FIFTY),
+THIRTY = (overflow -> sugerola -> returnFIFTEEN -> STOP
+| overflow -> sugeroladiet -> returnTEN -> STOP
+| overflow -> sugerolasuperdiet -> returnFIVE -> STOP),
+THIRTY_FIVE = (overflow -> sugerola -> returnTWENTY -> STOP
+| overflow -> sugeroladiet -> returnFIFTEEN -> STOP
+| overflow -> sugerolasuperdiet -> returnTEN -> STOP),
+FORTY = (overflow -> sugerola -> returnTWENTY_FIVE -> STOP
+| overflow -> sugeroladiet -> returnTWENTY -> STOP
+| overflow -> sugerolasuperdiet -> returnFIFTEEN -> STOP),
+FORTY_FIVE = (overflow -> sugerola -> returnTHIRTY -> STOP
+| overflow -> sugeroladiet -> returnTWENTY_FIVE -> STOP
+| overflow -> sugerolasuperdiet -> returnTEN -> STOP),
+FIFTY = (overflow -> sugerola -> returnTHIRTY_FIVE -> STOP
+| overflow -> sugeroladiet -> returnTHIRTY -> STOP
+| overflow -> sugerolasuperdiet -> returnTWENTY_FIVE -> STOP).
