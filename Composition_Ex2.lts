@@ -1,0 +1,5 @@
+S2 = (a -> S2A | c -> S2B),
+S2A = (c -> b -> d -> S2C | c -> b -> e -> S2D),
+S2B = (a -> b -> d -> S2C | a -> b -> e -> S2D),
+S2C = (e -> S2 | a -> e -> S2A),
+S2D = (d -> S2 | c -> d -> S2B).
