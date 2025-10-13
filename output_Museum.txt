@@ -1,0 +1,46 @@
+Director: Museum is opening.
+East door opened.
+West door opened.
+Visitor 1 entered through East door.
+Visitor 7 entered through East door.
+Visitor 2 entered through East door.
+Person entered. People in museum: 1
+Person entered. People in museum: 2
+Visitor 10 entered through East door.
+Person entered. People in museum: 3
+Person entered. People in museum: 4
+Visitor 9 entered through East door.
+Person entered. People in museum: 5
+Visitor 8 entered through East door.
+Person entered. People in museum: 6
+Visitor 5 entered through East door.
+Person entered. People in museum: 7
+Visitor 6 entered through East door.
+Person entered. People in museum: 8
+Visitor 3 entered through East door.
+Person entered. People in museum: 9
+Visitor 4 entered through East door.
+Person entered. People in museum: 10
+Visitor 6 exited through West door.
+Person left. People in museum: 9
+Visitor 5 exited through West door.
+Person left. People in museum: 8
+Visitor 1 exited through West door.
+Person left. People in museum: 7
+Visitor 3 exited through West door.
+Person left. People in museum: 6
+Visitor 8 exited through West door.
+Person left. People in museum: 5
+Visitor 4 exited through West door.
+Person left. People in museum: 4
+Visitor 9 exited through West door.
+Person left. People in museum: 3
+Visitor 10 exited through West door.
+Person left. People in museum: 2
+Visitor 2 exited through West door.
+Person left. People in museum: 1
+Visitor 7 exited through West door.
+Person left. People in museum: 0
+Museum is empty.
+Director: Museum is closing to new entries.
+East door closed.
