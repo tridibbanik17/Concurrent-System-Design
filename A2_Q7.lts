@@ -1,0 +1,1 @@
+property P = (a -> (b -> P | a -> P) | b -> a -> P).
