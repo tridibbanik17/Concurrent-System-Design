@@ -1,0 +1,36 @@
+SMOKER_T=( get_paper -> get_match->roll_cigarrette -> smoke_cigarrette -> SMOKER_T).
+SMOKER_P=( get_tobacco -> get_match->roll_cigarrette -> smoke_cigarrette -> SMOKER_P).
+SMOKER_M=( get_tobacco -> get_paper->roll_cigarrette -> smoke_cigarrette -> SMOKER_M).
+TOBACCO = ( delivered -> picked -> TOBACCO ).
+PAPER = ( delivered -> picked -> PAPER ).
+MATCH = ( delivered -> picked -> MATCH ).
+AGENT_T = (can_deliver -> deliver_paper -> deliver_match -> AGENT_T ).
+AGENT_P = (can_deliver -> deliver_match -> deliver_tobacco -> AGENT_P ).
+AGENT_M = (can_deliver -> deliver_tobacco -> deliver_paper -> AGENT_M ).
+RULE = (can_deliver -> smoking_completed -> RULE ).
+||SMOKERS = (s_t:SMOKER_T || s_p:SMOKER_P || s_m:SMOKER_M ).
+||RESOURCES = ({s_m,s_p}::TOBACCO || {s_t,s_m}::PAPER || {s_t,s_p}::MATCH ).
+||AGENT_RULE = ({s_m,s_p,s_t}::RULE || {s_m,s_p}::AGENT_T || {s_m,s_t}::AGENT_P || {s_t,s_p}::AGENT_M ).
+||CIG_SMOKERS = (SMOKERS || RESOURCES || AGENT_RULE)/
+{ s_t.get_paper/s_t.picked,s_m.get_paper/s_m.picked,
+ s_p.get_paper/s_p.picked,s_t.deliver_paper/s_t.delivered,
+ s_m.deliver_paper/s_m.delivered,s_p.deliver_paper/s_p.delivered,
+ s_t.smoking_completed/s_t.smoke_cigarrette,
+ s_m.smoking_completed/s_m.smoke_cigarrette,
+ s_p.smoking_completed/s_p.smoke_cigarrette}.
+
+
+property CORRECT_PICKUP=( s_t.get_paper -> s_t.get_match -> CORRECT_PICKUP
+								| s_p.get_tobacco -> s_p.get_match ->CORRECT_PICKUP
+				| s_m.get_tobacco -> s_m.get_paper -> CORRECT_PICKUP).
+
+||FULL_CIG_SMOKERS = (SMOKERS || RESOURCES || AGENT_RULE || CORRECT_PICKUP)/
+{ s_t.get_paper/s_t.picked,
+ s_m.get_paper/s_m.picked,
+s_p.get_paper/s_p.picked,
+s_t.deliver_paper/s_t.delivered,
+s_m.deliver_paper/s_m.delivered,
+s_p.deliver_paper/s_p.delivered,
+s_t.smoking_completed/s_t.smoke_cigarrette,
+s_m.smoking_completed/s_m.smoke_cigarrette,
+s_p.smoking_completed/s_p.smoke_cigarrette}.
