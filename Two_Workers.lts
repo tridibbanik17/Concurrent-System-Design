@@ -1,0 +1,28 @@
+// ---- Resources & Lock ----
+LOCK    = ( acquire -> release -> LOCK ).
+DRILL   = ( takeDr -> putDr -> DRILL ).
+CLAMP   = ( takeCl -> putCl -> CLAMP ).
+
+W1 = ( start1 -> acquire1 -> takeDr1 -> takeCl1 -> work1 -> putDr1 -> putCl1 -> release1 -> W1 ).
+W2 = ( start2 -> acquire2 -> takeCl2 -> takeDr2 -> work2 -> putCl2 -> putDr2 -> release2 -> W2 ).
+
+||SYSTEM = ( W1 || W2 || LOCK || DRILL || CLAMP )
+/{
+  // bind both workers' acquire/release to the single LOCK
+  W1.acquire1 / LOCK.acquire,
+  W1.release1 / LOCK.release,
+  W2.acquire2 / LOCK.acquire,
+  W2.release2 / LOCK.release,
+
+  // map W1's drill and clamp actions to the shared DRILL and CLAMP
+  W1.takeDr1 / DRILL.takeDr,
+  W1.putDr1  / DRILL.putDr,
+  W1.takeCl1 / CLAMP.takeCl,
+  W1.putCl1  / CLAMP.putCl,
+
+  // map W2's actions similarly
+  W2.takeDr2 / DRILL.takeDr,
+  W2.putDr2  / DRILL.putDr,
+  W2.takeCl2 / CLAMP.takeCl,
+  W2.putCl2  / CLAMP.putCl
+}.

@@ -1,0 +1,21 @@
+// ----- Resources -----
+RESOURCE = (resourceTaken -> resourceAvailable -> RESOURCE).
+LOCK     = (lockAvailable -> releaseLock -> LOCK).
+
+// ----- Workers -----
+W1 = (getLock -> getDrill -> getClamp -> work1 -> putDrill -> putClamp -> releaseLock -> W1).
+W2 = (getLock -> getClamp -> getDrill -> work2 -> putClamp -> putDrill -> releaseLock -> W2).
+
+// ----- Composition -----
+||W1W2 = ( {drill, clamp}:RESOURCE || lock:LOCK || w1:W1 || w2:W2 )
+/{
+  // map locking actions (shared lock)
+  {w1,w2}.getLock     / lock.lockAvailable,
+  {w1,w2}.releaseLock / lock.releaseLock,
+
+  // map tool actions (shared resources)
+  {w1,w2}.getDrill / drill.resourceTaken,
+  {w1,w2}.putDrill / drill.resourceAvailable,
+  {w1,w2}.getClamp / clamp.resourceTaken,
+  {w1,w2}.putClamp / clamp.resourceAvailable
+}.
