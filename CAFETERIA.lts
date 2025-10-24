@@ -1,0 +1,16 @@
+const N = 4 // max capacity of both machines
+range Jobs = 0..N // amount of drinks in both machine
+TEA_MACHINE = TEA_MACHINE[N],
+TEA_MACHINE[j:Jobs] = (when(j==0) replace_tea -> TEA_MACHINE[N] | when(j>0) give_tea -> TEA_MACHINE[j-1]).
+COFFEE_MACHINE = COFFEE_MACHINE[N],
+COFFEE_MACHINE[j:Jobs] = (when (j==0) replace_coffee -> COFFEE_MACHINE[N] | when (j>0) give_coffee -> COFFEE_MACHINE[j-1]).
+CUSTOMER = (drink_tea -> CUSTOMER | drink_coffee -> CUSTOMER).
+const C = 3 // number of customers
+range Customers = 0..C // range of customers from 0 to 3
+||CUSTOMERS = (forall[i:Customers] customer[i]:CUSTOMER).
+STAFF_MEMBER = (replace_tea -> STAFF_MEMBER | replace_coffee -> STAFF_MEMBER).
+||CAFETERIA = (CUSTOMERS||TEA_MACHINE||COFFEE_MACHINE||STAFF_MEMBER)/
+{customer[Customers].drink_tea/give_tea,
+customer[Customers].drink_coffee/give_coffee,
+customer[Customers].replace_tea/replace_tea,
+customer[Customers].replace_coffee/replace_coffee}.
