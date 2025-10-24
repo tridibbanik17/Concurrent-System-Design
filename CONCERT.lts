@@ -1,0 +1,11 @@
+const False = 0
+const True = 1
+range Bool = False..True
+SEAT = SEAT[False],
+SEAT[reserved:Bool] = ( reserve -> SEAT[True] | query[reserved] -> SEAT[reserved] | when (reserved) reserve -> ERROR).
+range Seats = 0..1
+||SEATS = (seat[Seats]:SEAT).
+LOCK = (acquire -> release -> LOCK).
+TERMINAL = (choose[s:Seats] -> acquire -> seat[s].query[reserved:Bool] -> (when(!reserved)seat[s].reserve -> release -> TERMINAL | when(reserved) release -> TERMINAL)).
+set Terminals = {a, b}
+||CONCERT = (Terminals:TERMINAL || Terminals::SEATS || Terminals::LOCK).
