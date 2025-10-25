@@ -1,0 +1,9 @@
+LOCK = (lockAvailable -> releaseLock -> LOCK). 
+PHIL = (think -> PHIL | getlock -> (get_cookie -> eat_cookie -> releaselock -> PHIL | get_cola -> drink_cola -> releaselock -> PHIL)). 
+COOKIES = (get_cookie -> COOKIES). 
+COLA = (get_cola -> COLA). 
+||PHIL_COLA_COOKIE = ({a,b}:PHIL || COOKIES || COLA || lock:LOCK)
+/{
+a.getlock / lock.lockAvailable,
+b.getLock / lock.lockAvailable
+}.
