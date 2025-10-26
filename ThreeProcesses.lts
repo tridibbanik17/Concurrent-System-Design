@@ -1,0 +1,10 @@
+RESOURCE = (resourceTaken -> resourceAvailable -> RESOURCE).
+LOCK = (lockAvailable -> releaseLock -> LOCK).
+P = (getLock -> getA -> getB -> putB -> putA -> releaseLock -> P).
+Q = (getLock -> getB -> getA -> putA -> putB -> releaseLock -> Q).
+R = (getLock -> getA -> getB -> putB -> putA -> releaseLock -> R).
+||PQR = ({a,b}:RESOURCE || {lock}:LOCK || p:P || q:Q || r:R)
+ /{{p,q,r}.getLock/lock.lockAvailable, {p,q,r}.releaseLock/lock.releaseLock,
+ {p,q,r}.releaseLock/lock.resourceAvailable,
+ {p,q,r}.getA/{a,b}.resourceTaken,
+ {p,q,r}.putA/{a,b}.resourceAvailable}.
