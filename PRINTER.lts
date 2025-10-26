@@ -1,0 +1,3 @@
+PRINTER = (out_of_toner -> TECHNICIAN),
+User = (print -> PRINTER),
+TECHNICIAN = (replace_toner -> PRINTER).
