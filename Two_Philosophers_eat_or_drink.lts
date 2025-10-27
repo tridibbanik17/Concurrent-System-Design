@@ -1,0 +1,5 @@
+P1 = (think -> fetch_cookie -> eat -> return_cookie -> P1 | think -> fetch_cola -> drink -> return_cola -> P1).
+P2 = (think -> fetch_cookie -> eat -> return_cookie -> P2 | think -> fetch_cola -> drink -> return_cola -> P2).
+CD = (fetch_cookie -> CD | return_cookie -> CD).
+ColaD = (fetch_cola -> ColaD | return_cola -> ColaD).
+||P = (P1 || P2 || CD || ColaD).
