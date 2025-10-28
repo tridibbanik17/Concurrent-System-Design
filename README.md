@@ -17,5 +17,3 @@ It focuses on modeling concurrent processes, reasoning about safety and liveness
 - Various process composition and safety-property examples
 
 ---
-
-## Repository structure (suggested)
